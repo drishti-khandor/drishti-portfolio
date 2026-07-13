@@ -469,9 +469,9 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
               <div class="htl-panel-tags"><span>Python</span><span>FastAPI</span><span>Azure OpenAI</span><span>camelot</span><span>tabula</span><span>Azure SQL</span><span>React 18</span><span>TypeScript</span></div>
             </div>
             <div class="htl-panel" id="htlp-2">
-              <div class="htl-panel-head">Zero-Entry AI Textile Catalog</div>
-              <div class="htl-panel-body">Sellers upload a photo — Gemini Vision generates the entire listing. Custom prompt rules: SAREE IDENTIFICATION RULE (flat-lay detection), AUTHENTICITY RULE (never generic "printed" — always "Ajrakh", "Bandhani", "Hand Block-Printed"). 30+ categories, PIL watermarking, Docker + Render deployment.</div>
-              <div class="htl-panel-tags"><span>Next.js</span><span>Gemini Vision</span><span>FastAPI</span><span>PostgreSQL</span><span>AWS S3</span><span>Docker</span><span>Framer Motion</span></div>
+              <div class="htl-panel-head">Replaced Model Photography with AI — Solo, End-to-End</div>
+              <div class="htl-panel-body">Professional model photography costs thousands per shoot — out of reach for Kutch's artisan sellers. I built a full-stack platform that eliminates it entirely: upload a flat-lay photo of any textile, and AI generates a photorealistic model wearing the garment. Gemini Vision also auto-writes the complete listing — artisan-accurate title, description, materials, regional technique, and tags. Custom prompt rules enforce craft vocabulary across 30+ regional textile categories (Ajrakh, Bandhani, Chanderi — never "printed fabric"). Photography budget: near zero.</div>
+              <div class="htl-panel-tags"><span>AI Image Generation</span><span>Gemini Vision</span><span>Next.js</span><span>FastAPI</span><span>PostgreSQL</span><span>AWS S3</span><span>Docker</span><span>Prompt Engineering</span></div>
             </div>
           </div>
         </div>
@@ -811,7 +811,15 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
     lastMX=e.touches[0].clientX;lastMY=e.touches[0].clientY;
   },{passive:false});
-  window.addEventListener('touchend',e=>{if(drag){drag=false;}});
+  window.addEventListener('touchend',e=>{
+    if(!drag)return;
+    drag=false;
+    const t=e.changedTouches[0];
+    if(Math.abs(t.clientX-touchSX)<15&&Math.abs(t.clientY-touchSY)<15){
+      const best=hitTest(t.clientX,t.clientY,40);
+      if(best){selPt=best;showSkill(best.skill)}
+    }
+  });
 
   function showSkill(sk){
     document.getElementById('so-name').textContent=sk.name;
