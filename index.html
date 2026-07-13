@@ -480,10 +480,10 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     </div>
 
     <div class="about-stats">
-      <div class="astat"><div class="astat-val" data-target="3">0</div><div class="astat-lbl">AI Products Built</div></div>
-      <div class="astat"><div class="astat-val" data-target="50">0</div><div class="astat-lbl">Languages · Dubbing</div></div>
-      <div class="astat"><div class="astat-val" data-target="30">0</div><div class="astat-lbl">FastAPI Routes</div></div>
-      <div class="astat"><div class="astat-val" data-target="17">0</div><div class="astat-lbl">% of Human Dub Cost</div></div>
+      <div class="astat"><div class="astat-val">30+</div><div class="astat-lbl">FastAPI Routes</div></div>
+      <div class="astat"><div class="astat-val">PDF &amp; Excel</div><div class="astat-lbl">File Types</div></div>
+      <div class="astat"><div class="astat-val">∞</div><div class="astat-lbl">Vendor Formats</div></div>
+      <div class="astat"><div class="astat-val">3</div><div class="astat-lbl">Core Modules</div></div>
     </div>
 
   </div>
@@ -676,8 +676,10 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
       r:Math.random()*2.4+1.0
     });
   }
-  cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
-  cv.addEventListener('mouseleave',()=>{mx=-9999;my=-9999});
+  if(window.matchMedia('(hover:hover)').matches){
+    cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
+    cv.addEventListener('mouseleave',()=>{mx=-9999;my=-9999});
+  }
   function draw(){
     ctx.clearRect(0,0,W,H);
     // Strong cursor glow
@@ -719,20 +721,12 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
   resize();draw();window.addEventListener('resize',resize);
 })();
 
-/* ── ABOUT STAT COUNTERS ── */
-(function(){
-  const els=document.querySelectorAll('.astat-val[data-target]');
-  const io=new IntersectionObserver(entries=>{
-    entries.forEach(e=>{
-      if(!e.isIntersecting)return;
-      const el=e.target,target=+el.dataset.target;
-      let cur=0;const step=target/40;
-      const t=setInterval(()=>{cur=Math.min(target,cur+step);el.textContent=Math.round(cur)+(target===17?'%':target===50?'+':target===30?'+':'');if(cur>=target)clearInterval(t)},30);
-      io.unobserve(el);
-    });
-  },{threshold:.5});
-  els.forEach(el=>io.observe(el));
-})();
+/* ── ABOUT STAT DATA ── */
+var ABOUT_STATS=[
+  [{v:'3',l:'AI Products Built'},{v:'50+',l:'Languages Dubbed'},{v:'17%',l:'of Human Dub Cost'},{v:'1',l:'LangGraph Pipeline'}],
+  [{v:'30+',l:'FastAPI Routes'},{v:'PDF & Excel',l:'File Types'},{v:'∞',l:'Vendor Formats'},{v:'3',l:'Core Modules'}],
+  [{v:'20',l:'Batch Upload Limit'},{v:'~₹0',l:'Photography Cost'},{v:'30+',l:'Textile Categories'},{v:'6',l:'API Modules'}]
+];
 
 /* ── SKILLS 3D SPHERE ── */
 (function(){
@@ -1058,8 +1052,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay()});
     });
     nodes.forEach(n=>{n.ox=n.x;n.oy=n.y});
   }
-  cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
-  cv.addEventListener('mouseleave',()=>{mx=-999;my=-999});
+  if(window.matchMedia('(hover:hover)').matches){
+    cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
+    cv.addEventListener('mouseleave',()=>{mx=-999;my=-999});
+  }
+  cv.addEventListener('touchmove',e=>{const r=cv.getBoundingClientRect();mx=e.touches[0].clientX-r.left;my=e.touches[0].clientY-r.top},{passive:true});
+  cv.addEventListener('touchend',()=>{mx=-999;my=-999});
   function draw(){
     ctx.clearRect(0,0,W,H);
     const hasMouse=mx>0&&mx<W&&my>0&&my<H;
@@ -1125,6 +1123,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay()});
 window.htlSwitch=function(idx){
   document.querySelectorAll('.htl-node').forEach((n,i)=>n.classList.toggle('active',i===idx));
   document.querySelectorAll('.htl-panel').forEach((p,i)=>p.classList.toggle('active',i===idx));
+  var stats=document.querySelectorAll('.astat');
+  ABOUT_STATS[idx].forEach(function(s,i){
+    stats[i].querySelector('.astat-val').textContent=s.v;
+    stats[i].querySelector('.astat-lbl').textContent=s.l;
+  });
 };
 
 /* ── NAV ── */
