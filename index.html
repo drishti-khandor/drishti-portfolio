@@ -119,7 +119,7 @@ h1.hero-name em{font-style:normal;color:var(--cyn)}
 .skills-headline{font-size:clamp(2rem,3.5vw,2.8rem);font-weight:900;line-height:1;letter-spacing:-.03em;margin-bottom:.85rem}
 .skills-sub{font-size:.83rem;color:var(--muted);line-height:1.65}
 .skills-canvas-wrap{position:relative;display:flex;flex-direction:column;align-items:center}
-#skills-canvas{cursor:grab;border-radius:16px}
+#skills-canvas{cursor:grab;border-radius:16px;touch-action:none}
 #skills-canvas:active{cursor:grabbing}
 .skill-overlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:300px;z-index:10000;background:rgba(10,10,20,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:1.6rem;backdrop-filter:blur(20px);display:none;box-shadow:0 20px 60px rgba(0,0,0,.8)}
 .skill-overlay.visible{display:block}
@@ -785,28 +785,34 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     return best;
   }
 
-  // Pointer events handle both mouse and touch uniformly
-  cv.style.touchAction='none'; // browser won't scroll/zoom from touches on canvas
+  cv.style.touchAction='none';
   cv.addEventListener('pointerdown',e=>{
-    drag=true;touchSX=lastMX=e.clientX;touchSY=lastMY=e.clientY;
-    cv.style.cursor='grabbing';cv.setPointerCapture(e.pointerId);
+    drag=true;touchSX=lastMX=e.clientX;touchSY=lastMY=e.clientY;cv.style.cursor='grabbing';
   });
-  cv.addEventListener('pointermove',e=>{
+  window.addEventListener('pointermove',e=>{
     if(!drag)return;
     const dx=e.clientX-lastMX,dy=e.clientY-lastMY;
     rotY-=dx*.007;rotX-=dy*.007;
     rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
     lastMX=e.clientX;lastMY=e.clientY;
   });
-  cv.addEventListener('pointerup',e=>{
+  window.addEventListener('pointerup',e=>{
     if(!drag)return;
     drag=false;cv.style.cursor='grab';
-    if(Math.abs(e.clientX-touchSX)<15&&Math.abs(e.clientY-touchSY)<15){
-      const best=hitTest(e.clientX,e.clientY,40);
-      if(best){selPt=best;showSkill(best.skill)}
+    const moved=Math.hypot(e.clientX-touchSX,e.clientY-touchSY);
+    if(moved<20){
+      // Convert each node from canvas-px to viewport-px and find nearest to tap
+      const rect=cv.getBoundingClientRect();
+      const s=rect.width/cv.width; // CSS px per canvas px
+      let best=null,bestD=9999;
+      for(const p of pts){
+        const dx=rect.left+p.x*s-e.clientX,dy=rect.top+p.y*s-e.clientY;
+        const d=Math.hypot(dx,dy);
+        if(d<bestD){bestD=d;best=p}
+      }
+      if(best&&bestD<60){selPt=best;showSkill(best.skill)}
     }
   });
-  cv.addEventListener('pointercancel',()=>{drag=false;cv.style.cursor='grab'});
 
   function showSkill(sk){
     document.getElementById('so-name').textContent=sk.name;
