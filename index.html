@@ -295,22 +295,97 @@ h1.hero-name em{font-style:normal;color:var(--cyn)}
 .contact-hint{text-align:center;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:.75rem}
 footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border)}
 .footer-copy,.footer-credit{font-size:.74rem;color:var(--dim)}
+.nav-hamburger{display:none;flex-direction:column;justify-content:center;gap:5px;cursor:pointer;padding:6px;background:none;border:none;z-index:300}
+.nav-hamburger span{display:block;width:22px;height:2px;background:var(--txt);border-radius:2px;transition:transform .3s,opacity .3s}
+.nav-hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.nav-hamburger.open span:nth-child(2){opacity:0}
+.nav-hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
 @media(max-width:768px){
+  /* Nav */
   nav{padding:1rem 1.5rem}
-  .hero-content,.work-slide,#contact{padding-left:1.5rem;padding-right:1.5rem}
-  .hero-name-row{flex-direction:column;align-items:flex-start;gap:1rem}
-  .hero-photo{width:120px;height:120px}
-  #about{padding:4rem 1.5rem}#skills{padding:0 1.5rem}
-  .about-stats,.timeline,.domains-grid{grid-template-columns:1fr 1fr}
-  .work-inner,.contact-inner,.skills-inner{grid-template-columns:1fr;gap:2.5rem}
-  .work-right{display:none}.work-counter{left:1.5rem}.work-hint{display:none}
+  .nav-hamburger{display:flex}
+  .nav-links{display:none;flex-direction:column;align-items:flex-start;position:absolute;top:100%;left:0;right:0;background:rgba(5,5,10,.97);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:1.5rem;gap:1.1rem;z-index:299}
+  .nav-links.open{display:flex}
+  .nav-links a{font-size:1rem;color:var(--muted)}
+  .nav-resume{padding:.6rem 1.2rem;margin-top:.25rem}
+
+  /* Hero */
+  .hero-content{padding:0 1.5rem;max-width:100%}
+  .hero-name-row{gap:1.2rem;align-items:center;flex-wrap:nowrap}
+  .hero-photo{width:88px;height:88px}
+  h1.hero-name{font-size:clamp(2.6rem,11vw,4rem)}
+  .hero-tagline{font-size:.87rem;max-width:100%;margin-bottom:1.5rem}
+  .hero-chips{gap:.35rem;margin-bottom:2rem}
+  .chip{font-size:.62rem;padding:.28rem .55rem}
+  .hero-ctas{gap:.75rem;flex-wrap:wrap}
+  .btn-primary,.btn-ghost{padding:.7rem 1.4rem;font-size:.82rem}
+
+  /* About */
+  #about{padding:3rem 1.5rem;border-radius:16px 16px 0 0}
+  .about-top{grid-template-columns:1fr;gap:2rem}
+  .about-headline{font-size:clamp(2rem,8vw,3rem)}
+  .about-bio{max-width:100%;font-size:.85rem}
+  .about-stats{grid-template-columns:1fr 1fr;gap:1rem}
+  .htl-track{flex-direction:column;justify-content:flex-start;padding-bottom:1rem}
+  .htl-rail{display:none}
+  .htl-node{flex-direction:row;align-items:center;gap:.75rem;justify-content:flex-start;padding:.5rem 0;flex:none;width:100%}
+  .htl-dot{margin-bottom:0;flex-shrink:0}
+  .htl-num{margin-bottom:0}
+  .htl-label,.htl-sub{text-align:left}
+
+  /* Work */
+  .work-slide{padding-left:1.5rem;padding-right:1.5rem}
+  .work-inner{grid-template-columns:1fr;gap:1.5rem}
+  .work-right{display:none}
+  .work-title{font-size:clamp(2rem,8vw,3rem);margin-bottom:.85rem}
+  .work-stats{gap:1rem}
+  .work-counter{left:1.5rem;bottom:1.5rem}
+  .work-hint{display:none}
+
+  /* Skills */
+  #skills{padding:3rem 1.5rem 4rem;border-radius:16px 16px 0 0}
+  .skills-inner{grid-template-columns:1fr;gap:1.5rem}
+  .skills-canvas-wrap{display:flex;justify-content:center;overflow:hidden;width:100%}
+  #skills-canvas{zoom:0.42}
+  .skills-hint{display:none}
+  .skill-overlay{width:calc(100vw - 3rem);left:0;right:0;top:auto;bottom:1rem;transform:none;position:fixed}
+
+  /* Overlay (project detail popup) */
+  .overlay{padding:.75rem;align-items:flex-end}
+  .overlay-card{padding:1.5rem;max-height:90vh;border-radius:18px 18px 0 0;width:100%;max-width:100%}
+  .oc-tabs{gap:.25rem;flex-wrap:wrap}
+  .oc-tab{font-size:.68rem;padding:.45rem .55rem}
+  .kf-cat-grid{grid-template-columns:1fr;gap:.4rem}
+  .kf-arch{flex-wrap:wrap;gap:.35rem}
+  .oc-metric-row{gap:.75rem}
+  .oc-metric-val{font-size:1.4rem}
+
+  /* Contact */
+  #contact{padding:3rem 1.5rem}
+  .contact-inner{grid-template-columns:1fr;gap:2rem}
+  .contact-canvas-wrap{height:200px;flex-shrink:0}
+  #contact-canvas{width:100%!important;height:200px!important}
+  .contact-headline{font-size:clamp(2rem,9vw,3.5rem)}
+  .contact-links{flex-wrap:wrap;gap:.5rem}
+
+  /* Footer */
   footer{padding:1.5rem;flex-direction:column;gap:.5rem;text-align:center}
+}
+
+@media(max-width:400px){
+  .hero-name-row{flex-direction:column;align-items:flex-start;gap:.75rem}
+  .hero-photo{width:75px;height:75px;margin-top:.25rem}
+  h1.hero-name{font-size:clamp(2.4rem,12vw,3.5rem)}
+  .overlay-card{padding:1.25rem}
+  .oc-metric-val{font-size:1.2rem}
 }
 </style>
 
 <nav id="nav">
   <a class="nav-logo" href="#hero">DK</a>
-  <div class="nav-links">
+  <button class="nav-hamburger" id="nav-burger" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="nav-links" id="nav-links">
     <a href="#about">About</a><a href="#work">Work</a>
     <a href="#skills">Skills</a><a href="#contact">Contact</a>
     <a class="nav-resume" href="#contact">Resume →</a>
@@ -1066,5 +1141,21 @@ function showToast(){
   t.style.display='block';
   setTimeout(function(){t.style.display='none'},2000);
 }
+
+/* ── HAMBURGER NAV ── */
+(function(){
+  const burger=document.getElementById('nav-burger');
+  const links=document.getElementById('nav-links');
+  burger.addEventListener('click',function(){
+    burger.classList.toggle('open');
+    links.classList.toggle('open');
+  });
+  links.querySelectorAll('a').forEach(function(a){
+    a.addEventListener('click',function(){
+      burger.classList.remove('open');
+      links.classList.remove('open');
+    });
+  });
+})();
 
 </script>
