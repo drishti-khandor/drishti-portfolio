@@ -121,7 +121,7 @@ h1.hero-name em{font-style:normal;color:var(--cyn)}
 .skills-canvas-wrap{position:relative;display:flex;flex-direction:column;align-items:center}
 #skills-canvas{cursor:grab;border-radius:16px}
 #skills-canvas:active{cursor:grabbing}
-.skill-overlay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:300px;z-index:10;background:rgba(10,10,20,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:1.6rem;backdrop-filter:blur(20px);display:none;box-shadow:0 20px 60px rgba(0,0,0,.8)}
+.skill-overlay{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:300px;z-index:10000;background:rgba(10,10,20,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:1.6rem;backdrop-filter:blur(20px);display:none;box-shadow:0 20px 60px rgba(0,0,0,.8)}
 .skill-overlay.visible{display:block}
 .so-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.85rem}
 .so-name{font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1}
@@ -351,7 +351,7 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
   .skills-canvas-wrap{display:flex;justify-content:center;overflow:hidden;width:100%}
   #skills-canvas{zoom:0.42}
   .skills-hint{display:none}
-  .skill-overlay{width:calc(100vw - 3rem);left:0;right:0;top:auto;bottom:1rem;transform:none;position:fixed}
+  .skill-overlay{width:calc(100vw - 3rem);left:50%;transform:translateX(-50%)}
 
   /* Overlay (project detail popup) */
   .overlay{padding:.75rem;align-items:flex-end}
@@ -498,22 +498,6 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     </div>
     <div class="skills-canvas-wrap">
       <canvas id="skills-canvas" width="780" height="660"></canvas>
-      <div class="skill-overlay" id="skill-overlay">
-        <button class="so-close" onclick="closeSkillOverlay()">✕</button>
-        <div class="so-header">
-          <div class="so-name" id="so-name">–</div>
-          <div class="so-cat-pill" id="so-cat">–</div>
-        </div>
-        <div class="so-proficiency-label">Proficiency</div>
-        <div class="so-score-row">
-          <div class="so-score-num" id="so-score-num">0</div>
-          <div class="so-score-denom">/100</div>
-          <div class="so-bar-wrap"><div class="so-bar" id="so-bar"></div></div>
-        </div>
-        <div class="so-desc" id="so-desc"></div>
-        <div class="so-projects-label">Projects</div>
-        <ul class="so-projects-list" id="so-projects-list"></ul>
-      </div>
       <div class="skills-hint">Drag to rotate · click to inspect</div>
     </div>
   </div>
@@ -691,7 +675,7 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
   }
   cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
   cv.addEventListener('mouseleave',()=>{mx=-9999;my=-9999});
-  cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();mx=e.touches[0].clientX-r.left;my=e.touches[0].clientY-r.top},{passive:false});
+  cv.addEventListener('touchmove',e=>{const r=cv.getBoundingClientRect();mx=e.touches[0].clientX-r.left;my=e.touches[0].clientY-r.top},{passive:true});
   cv.addEventListener('touchend',()=>{mx=-9999;my=-9999});
   function draw(){
     ctx.clearRect(0,0,W,H);
@@ -815,24 +799,19 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     if(best){selPt=best;showSkill(best.skill)}
   });
 
-  cv.addEventListener('touchstart',e=>{e.preventDefault();drag=true;touchSX=lastMX=e.touches[0].clientX;touchSY=lastMY=e.touches[0].clientY;cv.style.cursor='grabbing'},{passive:false});
-  window.addEventListener('touchmove',e=>{
+  cv.addEventListener('touchstart',e=>{
+    // passive — no preventDefault so click fires after tap
+    drag=true;touchSX=lastMX=e.touches[0].clientX;touchSY=lastMY=e.touches[0].clientY;
+  },{passive:true});
+  cv.addEventListener('touchmove',e=>{
     if(!drag)return;
+    e.preventDefault(); // block page scroll while rotating sphere
     const dx=e.touches[0].clientX-lastMX,dy=e.touches[0].clientY-lastMY;
     rotY-=dx*.007;rotX-=dy*.007;
     rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
     lastMX=e.touches[0].clientX;lastMY=e.touches[0].clientY;
-  },{passive:true});
-  window.addEventListener('touchend',e=>{
-    if(!drag)return;
-    drag=false;cv.style.cursor='grab';
-    const t=e.changedTouches[0];
-    // Only treat as tap if finger barely moved
-    if(Math.abs(t.clientX-touchSX)<15&&Math.abs(t.clientY-touchSY)<15){
-      const best=hitTest(t.clientX,t.clientY,40);
-      if(best){selPt=best;showSkill(best.skill)}
-    }
-  });
+  },{passive:false});
+  window.addEventListener('touchend',e=>{if(drag){drag=false;}});
 
   function showSkill(sk){
     document.getElementById('so-name').textContent=sk.name;
@@ -1080,7 +1059,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay()});
   }
   cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();mx=e.clientX-r.left;my=e.clientY-r.top});
   cv.addEventListener('mouseleave',()=>{mx=-999;my=-999});
-  cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();mx=e.touches[0].clientX-r.left;my=e.touches[0].clientY-r.top},{passive:false});
+  cv.addEventListener('touchmove',e=>{const r=cv.getBoundingClientRect();mx=e.touches[0].clientX-r.left;my=e.touches[0].clientY-r.top},{passive:true});
   cv.addEventListener('touchend',()=>{mx=-999;my=-999});
   function draw(){
     ctx.clearRect(0,0,W,H);
@@ -1192,3 +1171,19 @@ function showToast(){
 })();
 
 </script>
+<div class="skill-overlay" id="skill-overlay">
+  <button class="so-close" onclick="closeSkillOverlay()">✕</button>
+  <div class="so-header">
+    <div class="so-name" id="so-name">–</div>
+    <div class="so-cat-pill" id="so-cat">–</div>
+  </div>
+  <div class="so-proficiency-label">Proficiency</div>
+  <div class="so-score-row">
+    <div class="so-score-num" id="so-score-num">0</div>
+    <div class="so-score-denom">/100</div>
+    <div class="so-bar-wrap"><div class="so-bar" id="so-bar"></div></div>
+  </div>
+  <div class="so-desc" id="so-desc"></div>
+  <div class="so-projects-label">Projects</div>
+  <ul class="so-projects-list" id="so-projects-list"></ul>
+</div>
