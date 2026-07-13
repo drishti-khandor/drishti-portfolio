@@ -405,6 +405,7 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     </div>
     <p class="hero-tagline">I build distributed AI systems and data pipelines — from multimodal dubbing infrastructure and agentic LLM orchestration, to document extraction engines that handle the chaos of real-world unstructured data.</p>
     <div class="hero-chips">
+      <span class="chip">BITS Pilani</span>
       <span class="chip">Agentic AI</span>
       <span class="chip">FastAPI · Celery · Redis</span>
       <span class="chip">LLM Orchestration</span>
@@ -469,9 +470,9 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
               <div class="htl-panel-tags"><span>Python</span><span>FastAPI</span><span>Azure OpenAI</span><span>camelot</span><span>tabula</span><span>Azure SQL</span><span>React 18</span><span>TypeScript</span></div>
             </div>
             <div class="htl-panel" id="htlp-2">
-              <div class="htl-panel-head">Replaced Model Photography with AI — Solo, End-to-End</div>
-              <div class="htl-panel-body">Professional model photography costs thousands per shoot — out of reach for Kutch's artisan sellers. I built a full-stack platform that eliminates it entirely: upload a flat-lay photo of any textile, and AI generates a photorealistic model wearing the garment. Gemini Vision also auto-writes the complete listing — artisan-accurate title, description, materials, regional technique, and tags. Custom prompt rules enforce craft vocabulary across 30+ regional textile categories (Ajrakh, Bandhani, Chanderi — never "printed fabric"). Photography budget: near zero.</div>
-              <div class="htl-panel-tags"><span>AI Image Generation</span><span>Gemini Vision</span><span>Next.js</span><span>FastAPI</span><span>PostgreSQL</span><span>AWS S3</span><span>Docker</span><span>Prompt Engineering</span></div>
+              <div class="htl-panel-head">Killed the Model Photoshoot with AI</div>
+              <div class="htl-panel-body">Upload a flat-lay textile photo → AI generates a photorealistic model wearing it + auto-writes the full listing. Built solo end-to-end. Photography cost: near zero.</div>
+              <div class="htl-panel-tags"><span>AI Image Gen</span><span>Gemini Vision</span><span>Next.js</span><span>FastAPI</span><span>AWS S3</span><span>Docker</span></div>
             </div>
           </div>
         </div>
@@ -784,42 +785,28 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     return best;
   }
 
-  cv.addEventListener('mousedown',e=>{drag=true;lastMX=e.clientX;lastMY=e.clientY;cv.style.cursor='grabbing'});
-  window.addEventListener('mouseup',()=>{drag=false;cv.style.cursor='grab'});
-  window.addEventListener('mousemove',e=>{
+  // Pointer events handle both mouse and touch uniformly
+  cv.style.touchAction='none'; // browser won't scroll/zoom from touches on canvas
+  cv.addEventListener('pointerdown',e=>{
+    drag=true;touchSX=lastMX=e.clientX;touchSY=lastMY=e.clientY;
+    cv.style.cursor='grabbing';cv.setPointerCapture(e.pointerId);
+  });
+  cv.addEventListener('pointermove',e=>{
     if(!drag)return;
     const dx=e.clientX-lastMX,dy=e.clientY-lastMY;
     rotY-=dx*.007;rotX-=dy*.007;
     rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
     lastMX=e.clientX;lastMY=e.clientY;
   });
-
-  cv.addEventListener('click',e=>{
-    const best=hitTest(e.clientX,e.clientY,22);
-    if(best){selPt=best;showSkill(best.skill)}
-  });
-
-  cv.addEventListener('touchstart',e=>{
-    // passive — no preventDefault so click fires after tap
-    drag=true;touchSX=lastMX=e.touches[0].clientX;touchSY=lastMY=e.touches[0].clientY;
-  },{passive:true});
-  cv.addEventListener('touchmove',e=>{
+  cv.addEventListener('pointerup',e=>{
     if(!drag)return;
-    e.preventDefault(); // block page scroll while rotating sphere
-    const dx=e.touches[0].clientX-lastMX,dy=e.touches[0].clientY-lastMY;
-    rotY-=dx*.007;rotX-=dy*.007;
-    rotX=Math.max(-Math.PI/2,Math.min(Math.PI/2,rotX));
-    lastMX=e.touches[0].clientX;lastMY=e.touches[0].clientY;
-  },{passive:false});
-  window.addEventListener('touchend',e=>{
-    if(!drag)return;
-    drag=false;
-    const t=e.changedTouches[0];
-    if(Math.abs(t.clientX-touchSX)<15&&Math.abs(t.clientY-touchSY)<15){
-      const best=hitTest(t.clientX,t.clientY,40);
+    drag=false;cv.style.cursor='grab';
+    if(Math.abs(e.clientX-touchSX)<15&&Math.abs(e.clientY-touchSY)<15){
+      const best=hitTest(e.clientX,e.clientY,40);
       if(best){selPt=best;showSkill(best.skill)}
     }
   });
+  cv.addEventListener('pointercancel',()=>{drag=false;cv.style.cursor='grab'});
 
   function showSkill(sk){
     document.getElementById('so-name').textContent=sk.name;
