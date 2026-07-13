@@ -788,7 +788,17 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     return{ox:Math.sin(th)*Math.cos(ph),oy:Math.sin(th)*Math.sin(ph),oz:Math.cos(th),x:0,y:0,z:0,skill:sk};
   });
 
-  let rotX=0.4,rotY=0,drag=false,lastMX=0,lastMY=0,selPt=null;
+  let rotX=0.4,rotY=0,drag=false,lastMX=0,lastMY=0,selPt=null,touchSX=0,touchSY=0;
+
+  function hitTest(clientX,clientY,radius){
+    const rect=cv.getBoundingClientRect();
+    // Account for CSS zoom: p.x/p.y are canvas pixels; clientX-rect.left is CSS pixels
+    const scaleX=cv.width/rect.width,scaleY=cv.height/rect.height;
+    const cx=(clientX-rect.left)*scaleX,cy=(clientY-rect.top)*scaleY;
+    let best=null,bestD=radius*scaleX;
+    for(const p of pts){const dx=p.x-cx,dy=p.y-cy,d=Math.sqrt(dx*dx+dy*dy);if(d<bestD){bestD=d;best=p}}
+    return best;
+  }
 
   cv.addEventListener('mousedown',e=>{drag=true;lastMX=e.clientX;lastMY=e.clientY;cv.style.cursor='grabbing'});
   window.addEventListener('mouseup',()=>{drag=false;cv.style.cursor='grab'});
@@ -801,13 +811,11 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
   });
 
   cv.addEventListener('click',e=>{
-    const rect=cv.getBoundingClientRect(),cx=e.clientX-rect.left,cy=e.clientY-rect.top;
-    let best=null,bestD=22;
-    for(const p of pts){const dx=p.x-cx,dy=p.y-cy,d=Math.sqrt(dx*dx+dy*dy);if(d<bestD){bestD=d;best=p}}
+    const best=hitTest(e.clientX,e.clientY,22);
     if(best){selPt=best;showSkill(best.skill)}
   });
 
-  cv.addEventListener('touchstart',e=>{e.preventDefault();drag=true;lastMX=e.touches[0].clientX;lastMY=e.touches[0].clientY;cv.style.cursor='grabbing'},{passive:false});
+  cv.addEventListener('touchstart',e=>{e.preventDefault();drag=true;touchSX=lastMX=e.touches[0].clientX;touchSY=lastMY=e.touches[0].clientY;cv.style.cursor='grabbing'},{passive:false});
   window.addEventListener('touchmove',e=>{
     if(!drag)return;
     const dx=e.touches[0].clientX-lastMX,dy=e.touches[0].clientY-lastMY;
@@ -819,12 +827,11 @@ footer{padding:2rem 3rem;display:flex;justify-content:space-between;align-items:
     if(!drag)return;
     drag=false;cv.style.cursor='grab';
     const t=e.changedTouches[0];
-    const rect=cv.getBoundingClientRect();
-    const scaleX=cv.width/rect.width,scaleY=cv.height/rect.height;
-    const cx=(t.clientX-rect.left)*scaleX,cy=(t.clientY-rect.top)*scaleY;
-    let best=null,bestD=28*scaleX;
-    for(const p of pts){const dx=p.x-cx,dy=p.y-cy,d=Math.sqrt(dx*dx+dy*dy);if(d<bestD){bestD=d;best=p}}
-    if(best){selPt=best;showSkill(best.skill)}
+    // Only treat as tap if finger barely moved
+    if(Math.abs(t.clientX-touchSX)<15&&Math.abs(t.clientY-touchSY)<15){
+      const best=hitTest(t.clientX,t.clientY,40);
+      if(best){selPt=best;showSkill(best.skill)}
+    }
   });
 
   function showSkill(sk){
